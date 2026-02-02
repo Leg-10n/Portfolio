@@ -1,0 +1,1786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kevin Monga - Backend Engineer</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Orbitron:wght@700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon-cyan: #00fff9;
+            --neon-pink: #ff006e;
+            --neon-green: #39ff14;
+            --neon-purple: #bc13fe;
+            --dark-bg: #0a0e27;
+            --darker-bg: #050810;
+            --terminal-green: #00ff41;
+            --terminal-amber: #ffb000;
+            --terminal-bg: #0c0c0c;
+            --terminal-border: #1f1f1f;
+            --grid-color: rgba(0, 255, 249, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--darker-bg);
+            color: var(--neon-cyan);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Mode Toggle Switch - Redesigned */
+        .mode-toggle-container {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .mode-label {
+            font-size: 0.75rem;
+            color: rgba(0, 255, 249, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .mode-label.active {
+            color: var(--neon-cyan);
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 48px;
+            height: 24px;
+            background: rgba(57, 255, 20, 0.15);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(57, 255, 20, 0.3);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 18px;
+            height: 18px;
+            background: var(--neon-green);
+            border-radius: 50%;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 0 0 8px var(--neon-green);
+        }
+
+        .toggle-switch:hover {
+            background: rgba(57, 255, 20, 0.25);
+            box-shadow: 0 0 15px rgba(57, 255, 20, 0.3);
+        }
+
+        .toggle-switch.active {
+            background: rgba(255, 176, 0, 0.15);
+            border-color: rgba(255, 176, 0, 0.3);
+        }
+
+        .toggle-switch.active::after {
+            left: calc(100% - 20px);
+            background: var(--terminal-amber);
+            box-shadow: 0 0 8px var(--terminal-amber);
+        }
+
+        .toggle-switch.active:hover {
+            background: rgba(255, 176, 0, 0.25);
+            box-shadow: 0 0 15px rgba(255, 176, 0, 0.3);
+        }
+
+        /* Animated grid background */
+        .grid-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(var(--grid-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        /* Scan line effect */
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(transparent, var(--neon-cyan));
+            animation: scan 4s linear infinite;
+            z-index: 999;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+
+        @keyframes scan {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(100vh); }
+        }
+
+        .container {
+            position: relative;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            z-index: 1;
+        }
+
+        /* Portfolio View Styles */
+        .portfolio-view {
+            display: block;
+        }
+
+        .portfolio-view.hidden {
+            display: none;
+        }
+
+        /* Terminal View Styles - ENHANCED */
+        .terminal-view {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: var(--terminal-bg);
+            z-index: 1500;
+            overflow: hidden;
+        }
+
+        .terminal-view.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* CRT Effect */
+        .terminal-view::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* Screen flicker */
+        .terminal-view::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(18, 16, 16, 0.1);
+            opacity: 0;
+            pointer-events: none;
+            animation: flicker 0.15s infinite;
+            z-index: 11;
+        }
+
+        @keyframes flicker {
+            0% { opacity: 0.27861; }
+            5% { opacity: 0.34769; }
+            10% { opacity: 0.23604; }
+            15% { opacity: 0.90626; }
+            20% { opacity: 0.18128; }
+            25% { opacity: 0.83891; }
+            30% { opacity: 0.65583; }
+            35% { opacity: 0.67807; }
+            40% { opacity: 0.26559; }
+            45% { opacity: 0.84693; }
+            50% { opacity: 0.96019; }
+            55% { opacity: 0.08594; }
+            60% { opacity: 0.20313; }
+            65% { opacity: 0.71988; }
+            70% { opacity: 0.53455; }
+            75% { opacity: 0.37288; }
+            80% { opacity: 0.71428; }
+            85% { opacity: 0.70419; }
+            90% { opacity: 0.7003; }
+            95% { opacity: 0.36108; }
+            100% { opacity: 0.24387; }
+        }
+
+        /* Terminal Window Chrome */
+        .terminal-window {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: var(--terminal-bg);
+            font-family: 'IBM Plex Mono', 'JetBrains Mono', monospace;
+            position: relative;
+            z-index: 1;
+        }
+
+        .terminal-titlebar {
+            background: var(--terminal-border);
+            border-bottom: 1px solid #333;
+            padding: 0.5rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            user-select: none;
+        }
+
+        .terminal-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .terminal-button {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .terminal-button:hover {
+            opacity: 0.7;
+        }
+
+        .terminal-button.close { background: #ff5f56; }
+        .terminal-button.minimize { background: #ffbd2e; }
+        .terminal-button.maximize { background: #27c93f; }
+
+        .terminal-title {
+            color: #888;
+            font-size: 0.85rem;
+            flex: 1;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .terminal-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+            background: var(--terminal-bg);
+            scrollbar-width: thin;
+            scrollbar-color: #333 var(--terminal-bg);
+        }
+
+        .terminal-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .terminal-container::-webkit-scrollbar-track {
+            background: var(--terminal-bg);
+        }
+
+        .terminal-container::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+        }
+
+        .terminal-container::-webkit-scrollbar-thumb:hover {
+            background: #444;
+        }
+
+        .terminal-output {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: var(--terminal-green);
+            text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
+            font-weight: 400;
+        }
+
+        .terminal-line {
+            margin-bottom: 0.25rem;
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .terminal-prompt {
+            color: var(--terminal-amber);
+            text-shadow: 0 0 5px rgba(255, 176, 0, 0.5);
+        }
+
+        .terminal-prompt::before {
+            content: 'kevin@portfolio:~$ ';
+            color: var(--terminal-green);
+            text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
+        }
+
+        .terminal-command {
+            color: #fff;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+            margin-left: 0.5rem;
+        }
+
+        .terminal-response {
+            color: var(--terminal-green);
+            text-shadow: 0 0 3px rgba(0, 255, 65, 0.3);
+            white-space: pre-wrap;
+            width: 100%;
+        }
+
+        .terminal-error {
+            color: #ff5555;
+            text-shadow: 0 0 5px rgba(255, 85, 85, 0.5);
+        }
+
+        .terminal-success {
+            color: #50fa7b;
+            text-shadow: 0 0 5px rgba(80, 250, 123, 0.5);
+            font-weight: 500;
+        }
+
+        .terminal-input-line {
+            background: var(--terminal-bg);
+            border-top: 1px solid #1a1a1a;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .terminal-input-prompt {
+            color: var(--terminal-green);
+            font-family: 'IBM Plex Mono', 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
+            flex-shrink: 0;
+        }
+
+        .terminal-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-family: 'IBM Plex Mono', 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            outline: none;
+            caret-color: var(--terminal-green);
+            text-shadow: 0 0 3px rgba(255, 255, 255, 0.3);
+        }
+
+        .terminal-input::selection {
+            background: var(--terminal-green);
+            color: var(--terminal-bg);
+        }
+
+        /* Blinking cursor */
+        @keyframes blink {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0; }
+        }
+
+        .terminal-input::after {
+            content: '▊';
+            animation: blink 1s infinite;
+        }
+
+        /* Header/Hero Section */
+        header {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            padding: 2rem 0;
+        }
+
+        .glitch-wrapper {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(3rem, 8vw, 7rem);
+            font-weight: 900;
+            color: var(--neon-cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            position: relative;
+            display: inline-block;
+            text-shadow: 
+                0 0 10px var(--neon-cyan),
+                0 0 20px var(--neon-cyan),
+                0 0 40px var(--neon-cyan);
+            animation: flickerText 3s infinite alternate;
+        }
+
+        @keyframes flickerText {
+            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+                text-shadow: 
+                    0 0 10px var(--neon-cyan),
+                    0 0 20px var(--neon-cyan),
+                    0 0 40px var(--neon-cyan);
+                opacity: 1;
+            }
+            20%, 24%, 55% {
+                text-shadow: none;
+                opacity: 0.8;
+            }
+        }
+
+        .terminal-prompt-hero {
+            color: var(--terminal-green);
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            opacity: 0;
+            animation: fadeIn 0.5s forwards;
+        }
+
+        .terminal-prompt-hero::before {
+            content: '> ';
+            color: var(--neon-pink);
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        .subtitle {
+            font-size: clamp(1.2rem, 3vw, 2rem);
+            color: var(--neon-pink);
+            margin-bottom: 2rem;
+            font-weight: 300;
+            opacity: 0;
+            animation: fadeIn 0.5s 0.3s forwards;
+        }
+
+        .hero-description {
+            max-width: 800px;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: rgba(0, 255, 249, 0.8);
+            margin-bottom: 2rem;
+            opacity: 0;
+            animation: fadeIn 0.5s 0.6s forwards;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            opacity: 0;
+            animation: fadeIn 0.5s 0.9s forwards;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            background: transparent;
+            border: 2px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--neon-cyan);
+            transition: left 0.3s ease;
+            z-index: -1;
+        }
+
+        .btn:hover::before {
+            left: 0;
+        }
+
+        .btn:hover {
+            color: var(--darker-bg);
+            box-shadow: 0 0 20px var(--neon-cyan);
+        }
+
+        .btn-secondary {
+            border-color: var(--neon-pink);
+            color: var(--neon-pink);
+        }
+
+        .btn-secondary::before {
+            background: var(--neon-pink);
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 0 20px var(--neon-pink);
+        }
+
+        /* Section Styling */
+        section {
+            margin: 8rem 0;
+            position: relative;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 3rem;
+        }
+
+        .section-number {
+            font-family: 'Orbitron', monospace;
+            font-size: 2rem;
+            color: var(--neon-pink);
+            font-weight: 700;
+        }
+
+        h2 {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(2rem, 4vw, 3rem);
+            color: var(--neon-cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            position: relative;
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--neon-pink), transparent);
+        }
+
+        /* Experience Cards */
+        .experience-card, .project-card {
+            background: rgba(10, 14, 39, 0.6);
+            border: 1px solid var(--neon-cyan);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .experience-card::before, .project-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--neon-pink), var(--neon-purple));
+        }
+
+        .experience-card:hover, .project-card:hover {
+            transform: translateX(10px);
+            border-color: var(--neon-pink);
+            box-shadow: 0 0 30px rgba(255, 0, 110, 0.3);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            color: var(--neon-cyan);
+            font-weight: 700;
+        }
+
+        .card-date {
+            color: var(--neon-pink);
+            font-size: 0.9rem;
+        }
+
+        .card-company {
+            color: var(--terminal-green);
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        .card-description {
+            color: rgba(0, 255, 249, 0.7);
+            margin-bottom: 1rem;
+            line-height: 1.8;
+        }
+
+        .card-description ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .card-description li {
+            padding-left: 1.5rem;
+            position: relative;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-description li::before {
+            content: '▹';
+            position: absolute;
+            left: 0;
+            color: var(--neon-pink);
+        }
+
+        .tech-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .tag {
+            padding: 0.3rem 0.8rem;
+            background: rgba(0, 255, 249, 0.1);
+            border: 1px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            font-size: 0.85rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Skills Grid */
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .skill-category {
+            background: rgba(10, 14, 39, 0.6);
+            border: 1px solid var(--neon-purple);
+            padding: 1.5rem;
+            position: relative;
+        }
+
+        .skill-category h3 {
+            color: var(--neon-pink);
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .skill-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .skill-item {
+            padding: 0.5rem 1rem;
+            background: rgba(0, 255, 249, 0.05);
+            border: 1px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .skill-item:hover {
+            background: rgba(0, 255, 249, 0.2);
+            transform: scale(1.05);
+        }
+
+        /* Contact Section */
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .contact-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            padding: 1.5rem;
+            background: rgba(10, 14, 39, 0.6);
+            border: 1px solid var(--neon-cyan);
+            transition: all 0.3s ease;
+        }
+
+        .contact-item:hover {
+            border-color: var(--neon-pink);
+            transform: translateY(-5px);
+            box-shadow: 0 0 20px rgba(255, 0, 110, 0.3);
+        }
+
+        .contact-label {
+            color: var(--neon-pink);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .contact-value {
+            color: var(--neon-cyan);
+            font-size: 1.1rem;
+            word-break: break-all;
+        }
+
+        .contact-value a {
+            color: var(--neon-cyan);
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .contact-value a:hover {
+            color: var(--neon-pink);
+            text-shadow: 0 0 10px var(--neon-pink);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 3rem 0;
+            border-top: 1px solid var(--grid-color);
+            margin-top: 5rem;
+            color: rgba(0, 255, 249, 0.5);
+        }
+
+        .footer-command {
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+
+        .footer-command::before {
+            content: '$ ';
+            color: var(--neon-pink);
+        }
+
+        /* Scroll Indicator */
+        .scroll-indicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--neon-pink), var(--neon-cyan));
+            z-index: 1000;
+            transition: width 0.1s ease;
+        }
+
+        /* Terminal-specific enhancements */
+        .command-hint {
+            color: #666;
+            font-style: italic;
+            text-shadow: none;
+        }
+
+        .section-divider {
+            color: #888;
+            margin: 0.5rem 0;
+            text-shadow: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 3rem;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                text-align: center;
+            }
+
+            .skills-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .mode-toggle-container {
+                top: 1rem;
+                right: 1rem;
+            }
+
+            .mode-label {
+                font-size: 0.65rem;
+            }
+
+            .toggle-switch {
+                width: 40px;
+                height: 20px;
+            }
+
+            .toggle-switch::after {
+                width: 16px;
+                height: 16px;
+            }
+
+            .toggle-switch.active::after {
+                left: calc(100% - 18px);
+            }
+
+            .terminal-container {
+                padding: 1rem;
+            }
+
+            .terminal-input-line {
+                padding: 1rem;
+            }
+        }
+
+        /* Custom cursor effect */
+        .cursor-glow {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--neon-cyan), transparent);
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.5;
+            transition: transform 0.1s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-bg"></div>
+    <div class="scanline"></div>
+    <div class="scroll-indicator" id="scrollIndicator"></div>
+    <div class="cursor-glow" id="cursorGlow"></div>
+
+    <!-- Mode Toggle -->
+    <div class="mode-toggle-container">
+        <span class="mode-label active" id="portfolioLabel">Portfolio Mode</span>
+        <div class="toggle-switch" id="modeToggle"></div>
+        <span class="mode-label" id="terminalLabel">Developer Mode</span>
+    </div>
+
+    <!-- Portfolio View -->
+    <div class="portfolio-view" id="portfolioView">
+        <div class="container">
+            <!-- Hero Section -->
+            <header>
+                <div class="terminal-prompt-hero">system.initialize()</div>
+                <div class="glitch-wrapper">
+                    <h1>Kevin Monga</h1>
+                </div>
+                <div class="subtitle">Backend / Full-Stack Software Engineer</div>
+                <div class="hero-description">
+                    Backend-focused engineer specializing in scalable REST APIs, real-time systems, and containerized services. 
+                    Proven track record building production-grade applications supporting 100+ concurrent users. 
+                    Currently based in Bangkok, crafting robust backend architectures with Python, Java, and modern cloud technologies.
+                </div>
+                <div class="cta-buttons">
+                    <a href="#contact" class="btn">Initialize Contact</a>
+                    <a href="#projects" class="btn btn-secondary">View Projects</a>
+                </div>
+            </header>
+
+            <!-- Experience Section -->
+            <section id="experience">
+                <div class="section-header">
+                    <span class="section-number">01.</span>
+                    <h2>Experience</h2>
+                </div>
+
+                <div class="experience-card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">Software Engineer Intern</div>
+                            <div class="card-company">The Gang Technology Co., Ltd.</div>
+                        </div>
+                        <div class="card-date">Aug 2025 – Dec 2025</div>
+                    </div>
+                    <div class="card-description">
+                        <ul>
+                            <li>Owned end-to-end development of two production Smart Office systems, spanning backend services, computer vision pipelines, APIs, and dashboards</li>
+                            <li><strong>Smart Parking Monitoring System:</strong> Built real-time vehicle detection backend using Python, OpenCV, and YOLO, processing multiple concurrent RTSP streams. Delivered parking availability updates to 100+ daily active users with scalability to 500+</li>
+                            <li><strong>Meeting Room Vacancy Monitoring:</strong> Developed computer-vision-based occupancy detection with stabilized state-change logic, reducing false-positive detections by 30%+</li>
+                            <li>Containerized backend services using Docker and collaborated with DevOps teams for production deployment</li>
+                            <li>Secured APIs with JWT authentication, implemented automated testing with Pytest, and enforced code quality via SonarQube</li>
+                        </ul>
+                    </div>
+                    <div class="tech-tags">
+                        <span class="tag">Python</span>
+                        <span class="tag">OpenCV</span>
+                        <span class="tag">YOLO</span>
+                        <span class="tag">FastAPI</span>
+                        <span class="tag">Docker</span>
+                        <span class="tag">JWT</span>
+                        <span class="tag">Pytest</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Projects Section -->
+            <section id="projects">
+                <div class="section-header">
+                    <span class="section-number">02.</span>
+                    <h2>Projects</h2>
+                </div>
+
+                <div class="project-card">
+                    <div class="card-header">
+                        <div class="card-title">Movie Recommendation System</div>
+                    </div>
+                    <div class="card-description">
+                        Built an end-to-end personalized recommendation platform to improve content discovery in large movie catalogs. 
+                        Designed backend services for authentication, user profiles, movie ratings, and preference tracking. 
+                        Implemented collaborative filtering and content-based algorithms using scikit-learn, processing thousands of user-movie interaction records.
+                    </div>
+                    <div class="tech-tags">
+                        <span class="tag">Python</span>
+                        <span class="tag">Django</span>
+                        <span class="tag">scikit-learn</span>
+                        <span class="tag">React</span>
+                        <span class="tag">REST APIs</span>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <div class="card-header">
+                        <div class="card-title">Cryptocurrency Portfolio Tracking Platform</div>
+                    </div>
+                    <div class="card-description">
+                        Developed a full-stack platform enabling users to track cryptocurrency investments in real time. 
+                        Designed RESTful APIs for portfolio creation, transaction tracking, and historical analytics. 
+                        Integrated external cryptocurrency pricing APIs to fetch live market data and analyze portfolio value, asset allocation, and profit/loss trends.
+                    </div>
+                    <div class="tech-tags">
+                        <span class="tag">FastAPI</span>
+                        <span class="tag">React</span>
+                        <span class="tag">PostgreSQL</span>
+                        <span class="tag">REST APIs</span>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <div class="card-header">
+                        <div class="card-title">Real-Time Video Streaming Platform</div>
+                    </div>
+                    <div class="card-description">
+                        Built a distributed backend supporting video uploads, asynchronous processing, and scalable media storage. 
+                        Implemented background workers for thumbnail generation and metadata extraction. 
+                        Stored and served video assets using AWS S3 for high availability. 
+                        Delivered real-time notifications for likes and comments using WebSockets.
+                    </div>
+                    <div class="tech-tags">
+                        <span class="tag">FastAPI</span>
+                        <span class="tag">React</span>
+                        <span class="tag">AWS S3</span>
+                        <span class="tag">WebSockets</span>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <div class="card-header">
+                        <div class="card-title">Game Analytics & Logging Platform</div>
+                    </div>
+                    <div class="card-description">
+                        Designed backend services to ingest high-frequency game events in real time. 
+                        Implemented REST APIs for querying aggregated gameplay data. 
+                        Built dashboards visualizing player behavior and engagement metrics.
+                    </div>
+                    <div class="tech-tags">
+                        <span class="tag">Spring Boot</span>
+                        <span class="tag">Vue.js</span>
+                        <span class="tag">REST APIs</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Skills Section -->
+            <section id="skills">
+                <div class="section-header">
+                    <span class="section-number">03.</span>
+                    <h2>Technical Arsenal</h2>
+                </div>
+
+                <div class="skills-grid">
+                    <div class="skill-category">
+                        <h3>Languages</h3>
+                        <div class="skill-list">
+                            <span class="skill-item">Python</span>
+                            <span class="skill-item">Java</span>
+                            <span class="skill-item">JavaScript</span>
+                            <span class="skill-item">TypeScript</span>
+                            <span class="skill-item">Scala</span>
+                            <span class="skill-item">Rust</span>
+                            <span class="skill-item">C</span>
+                        </div>
+                    </div>
+
+                    <div class="skill-category">
+                        <h3>Backend</h3>
+                        <div class="skill-list">
+                            <span class="skill-item">FastAPI</span>
+                            <span class="skill-item">Spring Boot</span>
+                            <span class="skill-item">Django</span>
+                            <span class="skill-item">Node.js</span>
+                            <span class="skill-item">Express.js</span>
+                        </div>
+                    </div>
+
+                    <div class="skill-category">
+                        <h3>Frontend</h3>
+                        <div class="skill-list">
+                            <span class="skill-item">React</span>
+                            <span class="skill-item">Vue.js</span>
+                            <span class="skill-item">Angular</span>
+                        </div>
+                    </div>
+
+                    <div class="skill-category">
+                        <h3>APIs & Protocols</h3>
+                        <div class="skill-list">
+                            <span class="skill-item">RESTful APIs</span>
+                            <span class="skill-item">WebSockets</span>
+                            <span class="skill-item">JWT</span>
+                            <span class="skill-item">OAuth</span>
+                        </div>
+                    </div>
+
+                    <div class="skill-category">
+                        <h3>Databases</h3>
+                        <div class="skill-list">
+                            <span class="skill-item">PostgreSQL</span>
+                            <span class="skill-item">MySQL</span>
+                        </div>
+                    </div>
+
+                    <div class="skill-category">
+                        <h3>DevOps & Tools</h3>
+                        <div class="skill-list">
+                            <span class="skill-item">Docker</span>
+                            <span class="skill-item">Git</span>
+                            <span class="skill-item">GitHub Actions</span>
+                            <span class="skill-item">CI/CD</span>
+                            <span class="skill-item">Pytest</span>
+                            <span class="skill-item">SonarQube</span>
+                        </div>
+                    </div>
+
+                    <div class="skill-category">
+                        <h3>Data & ML</h3>
+                        <div class="skill-list">
+                            <span class="skill-item">Pandas</span>
+                            <span class="skill-item">NumPy</span>
+                            <span class="skill-item">scikit-learn</span>
+                            <span class="skill-item">OpenCV</span>
+                            <span class="skill-item">YOLO</span>
+                        </div>
+                    </div>
+
+                    <div class="skill-category">
+                        <h3>Languages Spoken</h3>
+                        <div class="skill-list">
+                            <span class="skill-item">English</span>
+                            <span class="skill-item">Thai</span>
+                            <span class="skill-item">Hindi</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Education Section -->
+            <section id="education">
+                <div class="section-header">
+                    <span class="section-number">04.</span>
+                    <h2>Education</h2>
+                </div>
+
+                <div class="experience-card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">B.Sc. Computer Science</div>
+                            <div class="card-company">Mahidol University International College</div>
+                        </div>
+                        <div class="card-date">Apr 2022 – Apr 2026</div>
+                    </div>
+                </div>
+
+                <div class="experience-card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">Full-Stack Web Development Bootcamp</div>
+                            <div class="card-company">AISE Bootcamp</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Contact Section -->
+            <section id="contact">
+                <div class="section-header">
+                    <span class="section-number">05.</span>
+                    <h2>Initialize Contact</h2>
+                </div>
+
+                <div class="contact-grid">
+                    <div class="contact-item">
+                        <div class="contact-label">Email</div>
+                        <div class="contact-value">
+                            <a href="mailto:kevin.monga17@gmail.com">kevin.monga17@gmail.com</a>
+                        </div>
+                    </div>
+
+                    <div class="contact-item">
+                        <div class="contact-label">Phone</div>
+                        <div class="contact-value">
+                            <a href="tel:+66633799013">+66-633799013</a>
+                        </div>
+                    </div>
+
+                    <div class="contact-item">
+                        <div class="contact-label">Location</div>
+                        <div class="contact-value">Bangkok, Thailand</div>
+                    </div>
+
+                    <div class="contact-item">
+                        <div class="contact-label">GitHub</div>
+                        <div class="contact-value">
+                            <a href="https://github.com/kevinmonga" target="_blank">github.com/kevinmonga</a>
+                        </div>
+                    </div>
+
+                    <div class="contact-item">
+                        <div class="contact-label">LinkedIn</div>
+                        <div class="contact-value">
+                            <a href="https://linkedin.com/in/kevinmonga" target="_blank">linkedin.com/in/kevinmonga</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <footer>
+                <p>&copy; 2026 Kevin Monga. All systems operational.</p>
+                <p class="footer-command">exit(0)</p>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Terminal View -->
+    <div class="terminal-view" id="terminalView">
+        <div class="terminal-window">
+            <div class="terminal-titlebar">
+                <div class="terminal-buttons">
+                    <div class="terminal-button close"></div>
+                    <div class="terminal-button minimize"></div>
+                    <div class="terminal-button maximize"></div>
+                </div>
+                <div class="terminal-title" id="terminalTitle">kevin@portfolio: ~</div>
+            </div>
+            
+            <div class="terminal-container" id="terminalContainer">
+                <div class="terminal-output" id="terminalOutput">
+                    <div class="terminal-line">
+<span style="color: var(--terminal-green)">
+    ▄█   ▄█▄    ▄████████  ▄█    █▄   ▄█  ███▄▄▄▄   
+   ███ ▄███▀   ███    ███ ███    ███ ███  ███▀▀▀██▄ 
+   ███▐██▀     ███    █▀  ███    ███ ███▌ ███   ███ 
+  ▄█████▀     ▄███▄▄▄     ███    ███ ███▌ ███   ███ 
+ ▀▀█████▄    ▀▀███▀▀▀     ███    ███ ███▌ ███   ███ 
+   ███▐██▄     ███    █▄  ███    ███ ███  ███   ███ 
+   ███ ▀███▄   ███    ███ ███    ███ ███  ███   ███ 
+   ███   ▀█▀   ██████████  ▀██████▀  █▀    ▀█   █▀   
+   ▀                                                 
+</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span style="color: var(--terminal-amber)">╔════════════════════════════════════════════════════════╗</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span style="color: var(--terminal-amber)">║          Portfolio Terminal System v1.0.0              ║</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span style="color: var(--terminal-amber)">║          Backend Engineer | System Architect           ║</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span style="color: var(--terminal-amber)">╚════════════════════════════════════════════════════════╝</span>
+                    </div>
+                    <div class="terminal-line"></div>
+                    <div class="terminal-line">
+                        <span class="terminal-response">Initializing system...</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-success">[✓] Loading kernel modules</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-success">[✓] Mounting filesystems</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-success">[✓] Starting network services</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-success">[✓] Loading user profile</span>
+                    </div>
+                    <div class="terminal-line"></div>
+                    <div class="terminal-line">
+                        <span class="terminal-response">Last login: Mon Feb 2 14:30:22 2026 from 127.0.0.1</span>
+                    </div>
+                    <div class="terminal-line"></div>
+                    <div class="terminal-line">
+                        <span class="command-hint">Type 'help' to see available commands or 'banner' for ASCII art</span>
+                    </div>
+                    <div class="terminal-line"></div>
+                </div>
+            </div>
+
+            <div class="terminal-input-line">
+                <span class="terminal-input-prompt">kevin@portfolio:~$</span>
+                <input type="text" class="terminal-input" id="terminalInput" autocomplete="off" spellcheck="false" autofocus>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // File System Structure
+        const fileSystem = {
+            '/home/kevin/portfolio': {
+                'about.txt': 'about',
+                'skills.txt': 'skills',
+                'experience.txt': 'experience',
+                'projects.txt': 'projects',
+                'education.txt': 'education',
+                'contact.txt': 'contact'
+            }
+        };
+
+        let currentDirectory = '~';
+
+        // Resume Data
+        const resumeData = {
+            about: {
+                name: "Kevin Monga",
+                title: "Backend / Full-Stack Software Engineer",
+                location: "Bangkok, Thailand",
+                email: "kevin.monga17@gmail.com",
+                phone: "+66-633799013",
+                summary: "Backend-focused Computer Science undergraduate with proven experience building and deploying production-grade, real-time systems. Specialized in designing scalable REST APIs, asynchronous pipelines, and containerized services supporting 100+ concurrent users."
+            },
+            skills: {
+                languages: ["Python", "Java", "JavaScript", "TypeScript", "Scala", "Rust", "C"],
+                backend: ["FastAPI", "Spring Boot", "Django", "Node.js", "Express.js"],
+                frontend: ["React", "Vue.js", "Angular"],
+                apis: ["RESTful APIs", "WebSockets", "JWT Authentication", "OAuth"],
+                databases: ["PostgreSQL", "MySQL"],
+                devops: ["Docker", "Git", "GitHub Actions", "CI/CD", "Pytest", "SonarQube"],
+                data: ["Pandas", "NumPy", "scikit-learn"],
+                cv: ["OpenCV", "YOLO"],
+                spoken: ["English (Fluent)", "Thai (Fluent)", "Hindi (Fluent)"]
+            },
+            experience: [
+                {
+                    title: "Software Engineer Intern (Backend & Full-Stack)",
+                    company: "The Gang Technology Co., Ltd.",
+                    location: "Bangkok, Thailand",
+                    period: "Aug 2025 – Dec 2025",
+                    highlights: [
+                        "Owned end-to-end development of two production Smart Office systems",
+                        "Built real-time vehicle detection backend using Python, OpenCV, and YOLO",
+                        "Delivered parking availability updates to 100+ daily active users",
+                        "Developed computer-vision-based occupancy detection",
+                        "Reduced false-positive detections by 30%+",
+                        "Containerized backend services using Docker",
+                        "Secured APIs with JWT authentication"
+                    ]
+                }
+            ],
+            projects: [
+                {
+                    name: "Movie Recommendation System",
+                    tech: ["Python", "Django", "scikit-learn", "React"],
+                    description: "Built an end-to-end personalized recommendation platform with collaborative filtering and content-based algorithms."
+                },
+                {
+                    name: "Cryptocurrency Portfolio Tracking Platform",
+                    tech: ["FastAPI", "React", "PostgreSQL"],
+                    description: "Developed a full-stack platform for tracking cryptocurrency investments in real time with historical analytics."
+                },
+                {
+                    name: "Real-Time Video Streaming Platform",
+                    tech: ["FastAPI", "React", "AWS S3", "WebSockets"],
+                    description: "Built a distributed backend supporting video uploads, asynchronous processing, and real-time notifications."
+                },
+                {
+                    name: "Game Analytics & Logging Platform",
+                    tech: ["Spring Boot", "Vue.js"],
+                    description: "Designed backend services to ingest high-frequency game events with real-time analytics dashboards."
+                }
+            ],
+            education: [
+                {
+                    degree: "B.Sc. Computer Science",
+                    institution: "Mahidol University International College",
+                    period: "Apr 2022 – Apr 2026"
+                },
+                {
+                    degree: "Full-Stack Web Development Bootcamp",
+                    institution: "AISE Bootcamp"
+                }
+            ],
+            contact: {
+                email: "kevin.monga17@gmail.com",
+                phone: "+66-633799013",
+                github: "github.com/kevinmonga",
+                linkedin: "linkedin.com/in/kevinmonga",
+                location: "Bangkok, Thailand"
+            }
+        };
+
+        // Terminal State
+        let commandHistory = [];
+        let historyIndex = -1;
+
+        // Mode Toggle Elements
+        const modeToggle = document.getElementById('modeToggle');
+        const portfolioView = document.getElementById('portfolioView');
+        const terminalView = document.getElementById('terminalView');
+        const portfolioLabel = document.getElementById('portfolioLabel');
+        const terminalLabel = document.getElementById('terminalLabel');
+        const terminalInput = document.getElementById('terminalInput');
+
+        // Terminal Commands
+        const commands = {
+            help: () => {
+                return `<span class="terminal-success">Available Commands:</span>
+
+<span class="section-divider">═══ RESUME COMMANDS ═══</span>
+  about           Display professional summary and contact info
+  skills          List all technical skills
+  experience      Show work experience
+  projects        List all projects
+  education       Display education background
+  contact         Show contact information
+  
+<span class="section-divider">═══ FILE SYSTEM COMMANDS ═══</span>
+  ls              List directory contents
+  pwd             Print working directory
+  cd [dir]        Change directory
+  cat [file]      Display file contents
+  tree            Display directory tree
+  
+<span class="section-divider">═══ SYSTEM COMMANDS ═══</span>
+  clear           Clear terminal screen
+  help            Show this help message
+  whoami          Display current user
+  date            Show current date and time
+  echo [text]     Print text to terminal
+  history         Show command history
+  banner          Display ASCII banner
+  uname           Show system information
+  
+<span class="command-hint">Tip: Use arrow keys to navigate command history</span>`;
+            },
+
+            about: () => {
+                const { name, title, location, summary } = resumeData.about;
+                return `<span class="terminal-success">╔═══════════════════════════════════════╗</span>
+<span class="terminal-success">║        PROFESSIONAL SUMMARY           ║</span>
+<span class="terminal-success">╚═══════════════════════════════════════╝</span>
+
+<span style="color: var(--terminal-amber)">Name:</span>     ${name}
+<span style="color: var(--terminal-amber)">Title:</span>    ${title}
+<span style="color: var(--terminal-amber)">Location:</span> ${location}
+
+<span style="color: var(--terminal-amber)">Summary:</span>
+${summary}`;
+            },
+
+            skills: () => {
+                let output = `<span class="terminal-success">╔═══════════════════════════════════════╗</span>
+<span class="terminal-success">║          TECHNICAL SKILLS             ║</span>
+<span class="terminal-success">╚═══════════════════════════════════════╝</span>
+`;
+                
+                for (const [category, skills] of Object.entries(resumeData.skills)) {
+                    const categoryName = category.charAt(0).toUpperCase() + category.slice(1);
+                    output += `
+<span style="color: var(--terminal-amber)">${categoryName}:</span>
+  ${skills.join(', ')}
+`;
+                }
+                
+                return output;
+            },
+
+            experience: () => {
+                let output = `<span class="terminal-success">╔═══════════════════════════════════════╗</span>
+<span class="terminal-success">║         WORK EXPERIENCE               ║</span>
+<span class="terminal-success">╚═══════════════════════════════════════╝</span>
+`;
+                
+                resumeData.experience.forEach((exp, index) => {
+                    output += `
+<span style="color: var(--terminal-amber)">${exp.title}</span>
+<span style="color: #fff">${exp.company}</span> | ${exp.location}
+<span style="color: #888">${exp.period}</span>
+
+Key Highlights:
+`;
+                    exp.highlights.forEach(highlight => {
+                        output += `  ▹ ${highlight}\n`;
+                    });
+                });
+                
+                return output;
+            },
+
+            projects: () => {
+                let output = `<span class="terminal-success">╔═══════════════════════════════════════╗</span>
+<span class="terminal-success">║            PROJECTS                   ║</span>
+<span class="terminal-success">╚═══════════════════════════════════════╝</span>
+`;
+                
+                resumeData.projects.forEach((project, index) => {
+                    output += `
+<span style="color: var(--terminal-amber)">${index + 1}. ${project.name}</span>
+   ${project.description}
+   <span style="color: #888">Tech:</span> ${project.tech.join(', ')}
+`;
+                });
+                
+                return output;
+            },
+
+            education: () => {
+                let output = `<span class="terminal-success">╔═══════════════════════════════════════╗</span>
+<span class="terminal-success">║           EDUCATION                   ║</span>
+<span class="terminal-success">╚═══════════════════════════════════════╝</span>
+`;
+                
+                resumeData.education.forEach(edu => {
+                    output += `
+<span style="color: var(--terminal-amber)">${edu.degree}</span>
+<span style="color: #fff">${edu.institution}</span>
+${edu.period ? `<span style="color: #888">${edu.period}</span>` : ''}
+`;
+                });
+                
+                return output;
+            },
+
+            contact: () => {
+                const { email, phone, github, linkedin, location } = resumeData.contact;
+                return `<span class="terminal-success">╔═══════════════════════════════════════╗</span>
+<span class="terminal-success">║         CONTACT INFORMATION           ║</span>
+<span class="terminal-success">╚═══════════════════════════════════════╝</span>
+
+<span style="color: var(--terminal-amber)">Email:</span>    ${email}
+<span style="color: var(--terminal-amber)">Phone:</span>    ${phone}
+<span style="color: var(--terminal-amber)">GitHub:</span>   ${github}
+<span style="color: var(--terminal-amber)">LinkedIn:</span> ${linkedin}
+<span style="color: var(--terminal-amber)">Location:</span> ${location}`;
+            },
+
+            whoami: () => {
+                return `kevin`;
+            },
+
+            date: () => {
+                return new Date().toString();
+            },
+
+            clear: () => {
+                document.getElementById('terminalOutput').innerHTML = '';
+                return null;
+            },
+
+            history: () => {
+                if (commandHistory.length === 0) {
+                    return 'No command history.';
+                }
+                return commandHistory.map((cmd, i) => `  ${i + 1}  ${cmd}`).join('\n');
+            },
+
+            banner: () => {
+                return `<span style="color: var(--terminal-green)">
+██╗  ██╗███████╗██╗   ██╗██╗███╗   ██╗
+██║ ██╔╝██╔════╝██║   ██║██║████╗  ██║
+█████╔╝ █████╗  ██║   ██║██║██╔██╗ ██║
+██╔═██╗ ██╔══╝  ╚██╗ ██╔╝██║██║╚██╗██║
+██║  ██╗███████╗ ╚████╔╝ ██║██║ ╚████║
+╚═╝  ╚═╝╚══════╝  ╚═══╝  ╚═╝╚═╝  ╚═══╝
+</span>
+<span style="color: var(--terminal-amber)">Backend Engineer | System Architect</span>
+<span style="color: #888">Type 'help' for available commands</span>`;
+            },
+
+            echo: (args) => {
+                return args.join(' ');
+            },
+
+            ls: (args) => {
+                if (currentDirectory === '~') {
+                    return `<span style="color: var(--terminal-green)">portfolio/</span>`;
+                } else if (currentDirectory === '~/portfolio') {
+                    const files = fileSystem['/home/kevin/portfolio'];
+                    const fileList = Object.keys(files).map(file => {
+                        return `<span style="color: var(--terminal-green)">${file}</span>`;
+                    }).join('  ');
+                    return fileList;
+                }
+                
+                return `<span class="terminal-error">ls: cannot access directory</span>`;
+            },
+
+            pwd: () => {
+                return currentDirectory;
+            },
+
+            cd: (args) => {
+                if (args.length === 0 || args[0] === '~') {
+                    currentDirectory = '~';
+                    updatePrompt();
+                    return null;
+                }
+
+                const target = args[0];
+                
+                if (target === 'portfolio' && currentDirectory === '~') {
+                    currentDirectory = '~/portfolio';
+                    updatePrompt();
+                    return null;
+                }
+                
+                if (target === '..' && currentDirectory === '~/portfolio') {
+                    currentDirectory = '~';
+                    updatePrompt();
+                    return null;
+                }
+                
+                if (target === '..') {
+                    return `<span class="terminal-error">cd: ${target}: Already at home directory</span>`;
+                }
+
+                return `<span class="terminal-error">cd: ${target}: No such file or directory</span>`;
+            },
+
+            cat: (args) => {
+                if (args.length === 0) {
+                    return `<span class="terminal-error">cat: missing file operand</span>`;
+                }
+
+                const filename = args[0];
+                
+                if (currentDirectory === '~') {
+                    return `<span class="terminal-error">cat: ${filename}: No such file or directory</span>`;
+                }
+                
+                const files = fileSystem['/home/kevin/portfolio'];
+
+                if (!files || !files[filename]) {
+                    return `<span class="terminal-error">cat: ${filename}: No such file or directory</span>`;
+                }
+
+                const commandName = files[filename];
+                return commands[commandName]();
+            },
+
+            tree: () => {
+                return `<span style="color: #888">~</span>
+└── <span style="color: var(--terminal-green)">portfolio/</span>
+    ├── <span style="color: var(--terminal-green)">about.txt</span>
+    ├── <span style="color: var(--terminal-green)">skills.txt</span>
+    ├── <span style="color: var(--terminal-green)">experience.txt</span>
+    ├── <span style="color: var(--terminal-green)">projects.txt</span>
+    ├── <span style="color: var(--terminal-green)">education.txt</span>
+    └── <span style="color: var(--terminal-green)">contact.txt</span>
+
+<span style="color: #666">1 directory, 6 files</span>`;
+            },
+
+            uname: () => {
+                return `Linux portfolio 5.15.0-kevin x86_64`;
+            }
+        };
+
+        function updatePrompt() {
+            const prompts = document.querySelectorAll('.terminal-input-prompt');
+            const displayDir = currentDirectory;
+            prompts.forEach(prompt => {
+                prompt.textContent = `kevin@portfolio:${displayDir}$`;
+            });
+            
+            // Update titlebar
+            const titlebar = document.getElementById('terminalTitle');
+            if (titlebar) {
+                titlebar.textContent = `kevin@portfolio: ${displayDir}`;
+            }
+        }
+
+        // Process Command
+        function processCommand(input) {
+            const parts = input.trim().split(' ');
+            const cmd = parts[0].toLowerCase();
+            const args = parts.slice(1);
+
+            if (commands[cmd]) {
+                return commands[cmd](args);
+            } else if (cmd === '') {
+                return null;
+            } else {
+                return `<span class="terminal-error">bash: ${cmd}: command not found</span>`;
+            }
+        }
+
+        // Add Output to Terminal
+        function addOutput(command, output) {
+            const terminalOutput = document.getElementById('terminalOutput');
+            
+            // Add command line with current directory in prompt
+            const commandLine = document.createElement('div');
+            commandLine.className = 'terminal-line';
+            const promptText = `kevin@portfolio:${currentDirectory}$`;
+            commandLine.innerHTML = `<span style="color: var(--terminal-green); text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);">${promptText}</span> <span class="terminal-command">${command}</span>`;
+            terminalOutput.appendChild(commandLine);
+
+            // Add output if exists
+            if (output !== null) {
+                const outputLine = document.createElement('div');
+                outputLine.className = 'terminal-line';
+                const responseDiv = document.createElement('div');
+                responseDiv.className = 'terminal-response';
+                responseDiv.innerHTML = output;
+                outputLine.appendChild(responseDiv);
+                terminalOutput.appendChild(outputLine);
+            }
+
+            // Add spacing
+            const spacer = document.createElement('div');
+            spacer.className = 'terminal-line';
+            terminalOutput.appendChild(spacer);
+
+            // Scroll to bottom
+            const terminalContainer = document.getElementById('terminalContainer');
+            terminalContainer.scrollTop = terminalContainer.scrollHeight;
+        }
+
+        // Handle Terminal Input
+        terminalInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const input = terminalInput.value;
+                
+                if (input.trim()) {
+                    commandHistory.push(input);
+                    historyIndex = commandHistory.length;
+                    
+                    const output = processCommand(input);
+                    addOutput(input, output);
+                }
+
+                terminalInput.value = '';
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (historyIndex > 0) {
+                    historyIndex--;
+                    terminalInput.value = commandHistory[historyIndex];
+                }
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (historyIndex < commandHistory.length - 1) {
+                    historyIndex++;
+                    terminalInput.value = commandHistory[historyIndex];
+                } else {
+                    historyIndex = commandHistory.length;
+                    terminalInput.value = '';
+                }
+            } else if (e.key === 'Tab') {
+                e.preventDefault();
+                const input = terminalInput.value.toLowerCase();
+                const matches = Object.keys(commands).filter(cmd => cmd.startsWith(input));
+                
+                if (matches.length === 1) {
+                    terminalInput.value = matches[0];
+                }
+            }
+        });
+
+        // Mode Toggle Event Listener
+        modeToggle.addEventListener('click', () => {
+            modeToggle.classList.toggle('active');
+            
+            if (modeToggle.classList.contains('active')) {
+                portfolioView.classList.add('hidden');
+                terminalView.classList.add('active');
+                portfolioLabel.classList.remove('active');
+                terminalLabel.classList.add('active');
+                setTimeout(() => {
+                    terminalInput.focus();
+                    updatePrompt();
+                }, 100);
+            } else {
+                portfolioView.classList.remove('hidden');
+                terminalView.classList.remove('active');
+                portfolioLabel.classList.add('active');
+                terminalLabel.classList.remove('active');
+            }
+        });
+
+        // Scroll indicator
+        window.addEventListener('scroll', () => {
+            const scrolled = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+            document.getElementById('scrollIndicator').style.width = scrolled + '%';
+        });
+
+        // Custom cursor glow
+        const cursorGlow = document.getElementById('cursorGlow');
+        document.addEventListener('mousemove', (e) => {
+            cursorGlow.style.left = e.clientX + 'px';
+            cursorGlow.style.top = e.clientY + 'px';
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
