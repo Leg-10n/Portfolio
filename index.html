@@ -255,6 +255,7 @@
             align-items: center;
             gap: 0.5rem;
             user-select: none;
+            min-height: 40px;
         }
 
         .terminal-buttons {
@@ -284,6 +285,9 @@
             flex: 1;
             text-align: center;
             font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .terminal-container {
@@ -293,6 +297,9 @@
             background: var(--terminal-bg);
             scrollbar-width: thin;
             scrollbar-color: #333 var(--terminal-bg);
+            /* Handle responsive width */
+            width: 100%;
+            max-width: 100vw;
         }
 
         .terminal-container::-webkit-scrollbar {
@@ -318,6 +325,9 @@
             color: var(--terminal-green);
             text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
             font-weight: 400;
+            /* Ensure content wraps */
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
         .terminal-line {
@@ -329,18 +339,14 @@
         .terminal-prompt {
             color: var(--terminal-amber);
             text-shadow: 0 0 5px rgba(255, 176, 0, 0.5);
-        }
-
-        .terminal-prompt::before {
-            content: 'kevin@portfolio:~$ ';
-            color: var(--terminal-green);
-            text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
+            margin-right: 0.5rem;
         }
 
         .terminal-command {
             color: #fff;
             text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
-            margin-left: 0.5rem;
+            /* Ensure long commands wrap */
+            word-break: break-all;
         }
 
         .terminal-response {
@@ -348,6 +354,24 @@
             text-shadow: 0 0 3px rgba(0, 255, 65, 0.3);
             white-space: pre-wrap;
             width: 100%;
+            /* Critical for mobile */
+            font-size: 0.9rem;
+        }
+
+        /* ASCII Art Responsive Handling */
+        .ascii-art {
+            white-space: pre;
+            overflow-x: auto;
+            max-width: 100%;
+            font-size: 10px; /* Smaller font for ASCII on mobile */
+            line-height: 1.2;
+        }
+        
+        /* Hide ASCII art on very small screens if it breaks */
+        @media (max-width: 450px) {
+            .ascii-art {
+                font-size: 6px; 
+            }
         }
 
         .terminal-error {
@@ -368,6 +392,7 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            flex-wrap: wrap; /* Allow wrapping on small screens */
         }
 
         .terminal-input-prompt {
@@ -388,6 +413,7 @@
             outline: none;
             caret-color: var(--terminal-green);
             text-shadow: 0 0 3px rgba(255, 255, 255, 0.3);
+            min-width: 50px;
         }
 
         .terminal-input::selection {
@@ -435,6 +461,7 @@
                 0 0 20px var(--neon-cyan),
                 0 0 40px var(--neon-cyan);
             animation: flickerText 3s infinite alternate;
+            word-wrap: break-word; /* Ensure H1 wraps */
         }
 
         @keyframes flickerText {
@@ -810,6 +837,19 @@
             text-shadow: none;
         }
 
+        /* Custom cursor effect */
+        .cursor-glow {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--neon-cyan), transparent);
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.5;
+            transition: transform 0.1s ease;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .container {
@@ -856,26 +896,35 @@
                 left: calc(100% - 18px);
             }
 
+            /* Terminal Responsive Overrides */
             .terminal-container {
-                padding: 1rem;
+                padding: 0.75rem;
+                font-size: 0.85rem;
+            }
+            
+            .terminal-output {
+                font-size: 0.85rem;
             }
 
             .terminal-input-line {
-                padding: 1rem;
+                padding: 0.75rem;
             }
-        }
+            
+            .terminal-buttons {
+                /* Hide window controls on mobile to save space */
+                display: none;
+            }
+            
+            .terminal-titlebar {
+                justify-content: center;
+                min-height: 35px;
+            }
 
-        /* Custom cursor effect */
-        .cursor-glow {
-            position: fixed;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: radial-gradient(circle, var(--neon-cyan), transparent);
-            pointer-events: none;
-            z-index: 9999;
-            opacity: 0.5;
-            transition: transform 0.1s ease;
+            /* Ensure input doesn't cause horizontal scroll */
+            .terminal-input {
+                width: 100%;
+                font-size: 16px; /* Prevent iOS zoom on input focus */
+            }
         }
     </style>
 </head>
@@ -885,17 +934,14 @@
     <div class="scroll-indicator" id="scrollIndicator"></div>
     <div class="cursor-glow" id="cursorGlow"></div>
 
-    <!-- Mode Toggle -->
     <div class="mode-toggle-container">
         <span class="mode-label active" id="portfolioLabel">Portfolio Mode</span>
         <div class="toggle-switch" id="modeToggle"></div>
         <span class="mode-label" id="terminalLabel">Developer Mode</span>
     </div>
 
-    <!-- Portfolio View -->
     <div class="portfolio-view" id="portfolioView">
         <div class="container">
-            <!-- Hero Section -->
             <header>
                 <div class="terminal-prompt-hero">system.initialize()</div>
                 <div class="glitch-wrapper">
@@ -913,7 +959,6 @@
                 </div>
             </header>
 
-            <!-- Experience Section -->
             <section id="experience">
                 <div class="section-header">
                     <span class="section-number">01.</span>
@@ -949,7 +994,6 @@
                 </div>
             </section>
 
-            <!-- Projects Section -->
             <section id="projects">
                 <div class="section-header">
                     <span class="section-number">02.</span>
@@ -1026,7 +1070,6 @@
                 </div>
             </section>
 
-            <!-- Skills Section -->
             <section id="skills">
                 <div class="section-header">
                     <span class="section-number">03.</span>
@@ -1119,7 +1162,6 @@
                 </div>
             </section>
 
-            <!-- Education Section -->
             <section id="education">
                 <div class="section-header">
                     <span class="section-number">04.</span>
@@ -1146,7 +1188,6 @@
                 </div>
             </section>
 
-            <!-- Contact Section -->
             <section id="contact">
                 <div class="section-header">
                     <span class="section-number">05.</span>
@@ -1189,7 +1230,6 @@
                 </div>
             </section>
 
-            <!-- Footer -->
             <footer>
                 <p>&copy; 2026 Kevin Monga. All systems operational.</p>
                 <p class="footer-command">exit(0)</p>
@@ -1197,7 +1237,6 @@
         </div>
     </div>
 
-    <!-- Terminal View -->
     <div class="terminal-view" id="terminalView">
         <div class="terminal-window">
             <div class="terminal-titlebar">
@@ -1212,29 +1251,29 @@
             <div class="terminal-container" id="terminalContainer">
                 <div class="terminal-output" id="terminalOutput">
                     <div class="terminal-line">
-<span style="color: var(--terminal-green)">
-    ▄█   ▄█▄    ▄████████  ▄█    █▄   ▄█  ███▄▄▄▄   
-   ███ ▄███▀   ███    ███ ███    ███ ███  ███▀▀▀██▄ 
-   ███▐██▀     ███    █▀  ███    ███ ███▌ ███   ███ 
-  ▄█████▀     ▄███▄▄▄     ███    ███ ███▌ ███   ███ 
- ▀▀█████▄    ▀▀███▀▀▀     ███    ███ ███▌ ███   ███ 
-   ███▐██▄     ███    █▄  ███    ███ ███  ███   ███ 
-   ███ ▀███▄   ███    ███ ███    ███ ███  ███   ███ 
-   ███   ▀█▀   ██████████  ▀██████▀  █▀    ▀█   █▀   
-   ▀                                                 
-</span>
+<div class="ascii-art" style="color: var(--terminal-green)">
+   ▄█   ▄█▄     ▄████████  ▄█    █▄    ▄█  ███▄▄▄▄    
+  ███ ▄███▀    ███     ███ ███    ███ ███  ███▀▀▀██▄  
+  ███▐██▀      ███     █▀  ███    ███ ███▌ ███   ███  
+ ▄█████▀      ▄███▄▄▄      ███    ███ ███▌ ███   ███  
+▀▀█████▄     ▀▀███▀▀▀      ███    ███ ███▌ ███   ███  
+  ███▐██▄      ███     █▄  ███    ███ ███  ███   ███  
+  ███ ▀███▄    ███     ███ ███    ███ ███  ███   ███  
+  ███   ▀█▀    ██████████  ▀██████▀  █▀    ▀█   █▀    
+  ▀                                                   
+</div>
                     </div>
                     <div class="terminal-line">
-                        <span style="color: var(--terminal-amber)">╔════════════════════════════════════════════════════════╗</span>
+                        <span style="color: var(--terminal-amber)">╔══════════════════════════════════════════════════╗</span>
                     </div>
                     <div class="terminal-line">
-                        <span style="color: var(--terminal-amber)">║          Portfolio Terminal System v1.0.0              ║</span>
+                        <span style="color: var(--terminal-amber)">║           Portfolio Terminal System v1.0.0       ║</span>
                     </div>
                     <div class="terminal-line">
-                        <span style="color: var(--terminal-amber)">║          Backend Engineer | System Architect           ║</span>
+                        <span style="color: var(--terminal-amber)">║           Backend Engineer | System Architect    ║</span>
                     </div>
                     <div class="terminal-line">
-                        <span style="color: var(--terminal-amber)">╚════════════════════════════════════════════════════════╝</span>
+                        <span style="color: var(--terminal-amber)">╚══════════════════════════════════════════════════╝</span>
                     </div>
                     <div class="terminal-line"></div>
                     <div class="terminal-line">
@@ -1466,7 +1505,7 @@ Key Highlights:
 
             projects: () => {
                 let output = `<span class="terminal-success">╔═══════════════════════════════════════╗</span>
-<span class="terminal-success">║            PROJECTS                   ║</span>
+<span class="terminal-success">║             PROJECTS                  ║</span>
 <span class="terminal-success">╚═══════════════════════════════════════╝</span>
 `;
                 
@@ -1483,7 +1522,7 @@ Key Highlights:
 
             education: () => {
                 let output = `<span class="terminal-success">╔═══════════════════════════════════════╗</span>
-<span class="terminal-success">║           EDUCATION                   ║</span>
+<span class="terminal-success">║            EDUCATION                  ║</span>
 <span class="terminal-success">╚═══════════════════════════════════════╝</span>
 `;
                 
@@ -1501,7 +1540,7 @@ ${edu.period ? `<span style="color: #888">${edu.period}</span>` : ''}
             contact: () => {
                 const { email, phone, github, linkedin, location } = resumeData.contact;
                 return `<span class="terminal-success">╔═══════════════════════════════════════╗</span>
-<span class="terminal-success">║         CONTACT INFORMATION           ║</span>
+<span class="terminal-success">║          CONTACT INFORMATION          ║</span>
 <span class="terminal-success">╚═══════════════════════════════════════╝</span>
 
 <span style="color: var(--terminal-amber)">Email:</span>    ${email}
@@ -1532,14 +1571,17 @@ ${edu.period ? `<span style="color: #888">${edu.period}</span>` : ''}
             },
 
             banner: () => {
-                return `<span style="color: var(--terminal-green)">
-██╗  ██╗███████╗██╗   ██╗██╗███╗   ██╗
-██║ ██╔╝██╔════╝██║   ██║██║████╗  ██║
-█████╔╝ █████╗  ██║   ██║██║██╔██╗ ██║
-██╔═██╗ ██╔══╝  ╚██╗ ██╔╝██║██║╚██╗██║
-██║  ██╗███████╗ ╚████╔╝ ██║██║ ╚████║
-╚═╝  ╚═╝╚══════╝  ╚═══╝  ╚═╝╚═╝  ╚═══╝
-</span>
+                return `<div class="ascii-art" style="color: var(--terminal-green)">
+   ▄█   ▄█▄     ▄████████  ▄█    █▄    ▄█  ███▄▄▄▄    
+  ███ ▄███▀    ███     ███ ███    ███ ███  ███▀▀▀██▄  
+  ███▐██▀      ███     █▀  ███    ███ ███▌ ███   ███  
+ ▄█████▀      ▄███▄▄▄      ███    ███ ███▌ ███   ███  
+▀▀█████▄     ▀▀███▀▀▀      ███    ███ ███▌ ███   ███  
+  ███▐██▄      ███     █▄  ███    ███ ███  ███   ███  
+  ███ ▀███▄    ███     ███ ███    ███ ███  ███   ███  
+  ███   ▀█▀    ██████████  ▀██████▀  █▀    ▀█   █▀    
+  ▀                                                   
+</div>
 <span style="color: var(--terminal-amber)">Backend Engineer | System Architect</span>
 <span style="color: #888">Type 'help' for available commands</span>`;
             },
@@ -1670,7 +1712,7 @@ ${edu.period ? `<span style="color: #888">${edu.period}</span>` : ''}
             const commandLine = document.createElement('div');
             commandLine.className = 'terminal-line';
             const promptText = `kevin@portfolio:${currentDirectory}$`;
-            commandLine.innerHTML = `<span style="color: var(--terminal-green); text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);">${promptText}</span> <span class="terminal-command">${command}</span>`;
+            commandLine.innerHTML = `<span style="color: var(--terminal-green); text-shadow: 0 0 5px rgba(0, 255, 65, 0.5); margin-right: 8px;">${promptText}</span> <span class="terminal-command">${command}</span>`;
             terminalOutput.appendChild(commandLine);
 
             // Add output if exists
