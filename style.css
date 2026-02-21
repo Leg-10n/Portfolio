@@ -321,14 +321,23 @@ h1.hero-h .outline { -webkit-text-stroke: 1px var(--dim); color: transparent; }
 .feat-badge { display: inline-flex; align-items: center; gap: 8px; font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--accent); }
 .feat-badge::before { content: ''; width: 20px; height: 1px; background: var(--accent); }
 .feat-line { flex: 1; height: 1px; background: var(--line); }
-.feat-card { display: grid; grid-template-columns: 1fr 380px; border: 1px solid var(--line); background: var(--bg1); overflow: hidden; }
-.feat-l { padding: 56px; border-right: 1px solid var(--line); }
+.feat-card {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  border: 1px solid var(--line);
+  background: var(--bg1);
+  overflow: hidden;
+  /* KEY FIX: prevent the card from overflowing the section */
+  width: 100%;
+  min-width: 0;
+}
+.feat-l { padding: 56px; border-right: 1px solid var(--line); min-width: 0; }
 .feat-name { font-family: var(--font-d); font-size: clamp(22px,3.5vw,42px); font-weight: 800; letter-spacing: -.04em; color: var(--white); margin-bottom: 20px; line-height: 1.0; }
 .feat-desc { color: var(--muted); font-size: 13px; line-height: 1.95; margin-bottom: 32px; }
 .feat-stack { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 36px; }
 .feat-pill { padding: 5px 14px; border: 1px solid rgba(0,255,136,.2); color: var(--accent); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; opacity: .7; }
 .feat-btns { display: flex; gap: 12px; }
-.feat-r { padding: 40px; display: flex; flex-direction: column; justify-content: center; }
+.feat-r { padding: 40px; display: flex; flex-direction: column; justify-content: center; min-width: 0; }
 .feat-metric { padding: 20px 0; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
 .feat-metric:first-child { border-top: 1px solid var(--line); }
 .feat-mk { font-size: 11px; color: var(--dim); letter-spacing: .08em; }
@@ -464,13 +473,33 @@ footer { padding: 28px 48px; border-top: 1px solid var(--line); display: flex; j
   .proj-desc { font-size: 12.5px; }
   .proj-footer { flex-direction: column; align-items: flex-start; gap: 16px; }
 
-  /* Featured */
-  .feat-card { grid-template-columns: 1fr; }
-  .feat-l { padding: 28px 24px; border-right: none; border-bottom: 1px solid var(--line); }
-  .feat-r { padding: 28px 24px; }
+  /* ── Featured card MOBILE FIX ── */
+  .feat-wrap { margin-top: 48px; }
+  .feat-card {
+    grid-template-columns: 1fr;   /* single column — stacks vertically */
+    overflow: visible;             /* let content breathe */
+  }
+  .feat-l {
+    padding: 28px 24px;
+    border-right: none;            /* remove side border */
+    border-bottom: 1px solid var(--line); /* separator between sections */
+  }
+  .feat-r {
+    padding: 28px 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
   .feat-name { font-size: clamp(22px, 6vw, 32px); }
-  .feat-metric { padding: 16px 0; }
-  .feat-mv { font-size: 17px; }
+  .feat-desc { font-size: 12.5px; }
+  .feat-stack { gap: 6px; }
+  .feat-metric {
+    padding: 14px 0;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .feat-mv { font-size: 16px; }
+  .feat-mk { font-size: 10px; }
 
   /* Contact */
   #contact { padding: 80px 20px; }
@@ -503,8 +532,10 @@ footer { padding: 28px 48px; border-top: 1px solid var(--line); display: flex; j
   .tl-logo-box { width: 36px; height: 36px; }
   .tl-role { font-size: 15px; }
 
+  /* Featured card small mobile */
   .feat-l { padding: 24px 20px; }
   .feat-r { padding: 24px 20px; }
+  .feat-mv { font-size: 15px; }
 
   .contact-big { font-size: clamp(36px, 12vw, 56px); }
   .soc-handle { display: none; } /* too cramped on tiny screens */
